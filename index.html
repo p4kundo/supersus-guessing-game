@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Among Us Guessing Game</title>
+    <title>Supersus Guessing Game</title>
     <link rel="stylesheet" href="bootstrap.min.css">
     <style>
         .score {
@@ -28,7 +28,7 @@
         }
 
         #nextRoundButton {
-            display: none; /* Hidden initially */
+            display: none;
             margin-top: 20px;
         }
     </style>
@@ -36,8 +36,6 @@
 <body>
     <div class="container-lg mt-4">
         <h1 class="text-center mb-3">SUPERSUS - GUESSING GAME</h1>
-
-        <!-- Score Display -->
         <div class="d-flex justify-content-between">
           <div class="score" id="scoreDisplay">
               Score: 0
@@ -46,8 +44,6 @@
               Round: 1 | Guesses Left: 3
           </div>
       </div>
-      
-      
         <div class="card">
             <div class="card-header">
                 <h2 class="card-title text-center">Who is the impostor?</h2>
@@ -56,7 +52,6 @@
                 <div class="row g-3">
                   <div class="col-lg-9 col-sm-9">
                     <div class="row g-3" id="players">
-
                     </div>
                   </div>
                   <div class="col-lg-3 col-sm-3">
@@ -86,208 +81,13 @@
                     </div>
                 </div>
                 </div>
-                
             </div>
-            
         </div>
-
-        <!-- Next Round Button -->
         <button id="nextRoundButton" class="btn btn-primary" onclick="nextRound()">Go to Next Round</button>
     </div>
 
     <script>
-        // Function to read a cookie by name
-        function getCookie(name) {
-            let cookieArr = document.cookie.split(';');
-            for (let i = 0; i < cookieArr.length; i++) {
-                let cookie = cookieArr[i].trim();
-                if (cookie.indexOf(name + "=") == 0) {
-                    return cookie.substring(name.length + 1, cookie.length);
-                }
-            }
-            return "";
-        }
-
-        // Function to set a cookie
-        function setCookie(name, value, days) {
-            let date = new Date();
-            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-            let expires = "expires=" + date.toUTCString();
-            document.cookie = name + "=" + value + ";" + expires + ";path=/";
-        }
-
-        // Function to load game state from cookies
-        function loadGameState() {
-            score = parseInt(getCookie('score')) || 0;
-            round = parseInt(getCookie('round')) || 1;
-            guessesLeft = parseInt(getCookie('guessesLeft')) || 3;
-            correctGuesses = parseInt(getCookie('correctGuesses')) || 0;
-            wrongGuesses = parseInt(getCookie('wrongGuesses')) || 0;
-        }
-
-        // Function to save game state to cookies
-        function saveGameState() {
-            setCookie('score', score, 7);
-            setCookie('round', round, 7);
-            setCookie('guessesLeft', guessesLeft, 7);
-            setCookie('correctGuesses', correctGuesses, 7);
-            setCookie('wrongGuesses', wrongGuesses, 7);
-        }
-
-        // Loading the game state when the page is loaded
-        window.onload = function() {
-            loadGameState();  // Load saved data from cookies
-            generateRoles();  // Generate roles for the current round
-            createPlayerCards();  // Create the player cards for the current round
-            updateScoreDisplay();  // Update the score display
-            updateRoundInfo();  // Update the round and guesses left display
-            updateCorrectIncorrectDisplay(); // Display correct/incorrect guesses
-        }
-
-        // Players and impostors
-        const players = ["BLUE", "RED", "GREEN", "YELLOW", "ORANGE", "PURPLE", "PINK", "BROWN", "WHITE", "CYAN"];
-        const impostorsCount = 2;
-        let impostors = [];
-        let playerRoles = [];
-        let score = 0; // Track the player's score
-        let round = 1; // Track the current round
-        let guessesLeft = 3; // Track guesses left for current round
-        let correctGuesses = 0; // Track correct guesses
-        let wrongGuesses = 0; // Track wrong guesses
-
-        // Function to generate roles for players
-        function generateRoles() {
-            const allPlayers = [...players];
-            allPlayers.sort(() => Math.random() - 0.5);
-            
-            impostors = allPlayers.slice(0, impostorsCount);
-            playerRoles = allPlayers.map(player => impostors.includes(player) ? 'Impostor' : 'Crewmate');
-        }
-
-        // Function to create player cards
-        function createPlayerCards() {
-            const playerContainer = document.getElementById("players");
-            playerContainer.innerHTML = ""; // Clear existing players
-
-            players.forEach((player, index) => {
-                const playerCard = document.createElement("div");
-                playerCard.classList.add("col-lg-6", "col-sm-6");
-                playerCard.setAttribute("id", `player-${player}`);
-                playerCard.innerHTML = `
-                    <div class="card" style="border-left: 5px solid ${getColorForPlayer(player)};">
-                        <div class="card-body d-flex justify-content-between align-items-center" id="card-${player}">
-                            <p class="mb-0">${player}</p>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-crosshair" viewBox="0 0 16 16" role="button" style="cursor: pointer;" onclick="handleGuess('${player}')">
-                                <path d="M8.5.5a.5.5 0 0 0-1 0v.518A7 7 0 0 0 1.018 7.5H.5a.5.5 0 0 0 0 1h.518A7 7 0 0 0 7.5 14.982v.518a.5.5 0 0 0 1 0v-.518A7 7 0 0 0 14.982 8.5h.518a.5.5 0 0 0 0-1h-.518A7 7 0 0 0 8.5 1.018zm-6.48 7A6 6 0 0 1 7.5 2.02v.48a.5.5 0 0 0 1 0v-.48a6 6 0 0 1 5.48 5.48h-.48a.5.5 0 0 0 0 1h.48a6 6 0 0 1-5.48 5.48v-.48a.5.5 0 0 0-1 0v.48A6 6 0 0 1 2.02 8.5h.48a.5.5 0 0 0 0-1zM8 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4"/>
-                            </svg>
-                        </div>
-                    </div>
-                `;
-                playerContainer.appendChild(playerCard);
-            });
-        }
-
-        // Function to get color for player
-        function getColorForPlayer(player) {
-            const colorMapping = {
-                "BLUE": "blue",
-                "RED": "red",
-                "GREEN": "green",
-                "YELLOW": "yellow",
-                "ORANGE": "orange",
-                "PURPLE": "purple",
-                "PINK": "pink",
-                "BROWN": "brown",
-                "WHITE": "white",
-                "CYAN": "cyan"
-            };
-            return colorMapping[player] || 'gray';
-        }
-
-        // Handle the guess when the icon is clicked
-        function handleGuess(player) {
-            const isImpostor = impostors.includes(player);
-            
-            if (isImpostor) {
-                score += 10; // Add points for a correct guess
-                correctGuesses++; // Increment correct guesses
-                showImpostorStatus(player, true); // Show impostor text
-            } else {
-                wrongGuesses++; // Increment wrong guesses
-                showImpostorStatus(player, false); // Show impostor text
-            }
-            updateScoreDisplay();
-            guessesLeft--; // Decrease guess count
-            updateRoundInfo();
-            updateCorrectIncorrectDisplay();
-            disableCard(player); // Disable the card after guessing
-            checkEndOfRound();
-            saveGameState(); // Save game state to cookies
-        }
-
-        // Show Impostor Text on the Card
-        function showImpostorStatus(player, isImpostor) {
-            const cardBody = document.getElementById(`card-${player}`);
-            const impostorText = document.createElement('p');
-            impostorText.classList.add('impostor-text', 'mb-0');
-            impostorText.innerText = isImpostor ? "Impostor" : "Spacecrew";
-            impostorText.style.color = isImpostor ? 'red' : 'blue';
-            impostorText.style.fontSize = impostorText.innerText.length > 30 ? "0.9em" : "1.1em";
-            cardBody.appendChild(impostorText);
-        }
-
-        // Disable the player card and hide the icon
-        function disableCard(player) {
-            const playerCard = document.getElementById(`player-${player}`);
-            const icon = playerCard.querySelector('svg'); 
-            playerCard.classList.add("disabled-card"); 
-            if (icon) {
-                icon.style.display = "none"; 
-            }
-        }
-
-        // Check if the round is over
-        function checkEndOfRound() {
-            if (guessesLeft <= 0) {
-                disableAllIcons();
-                document.getElementById("nextRoundButton").style.display = "block";
-            }
-        }
-
-        // Disable all icons when guesses are finished
-        function disableAllIcons() {
-            const icons = document.querySelectorAll('svg');
-            icons.forEach(icon => {
-                icon.style.pointerEvents = "none";
-            });
-        }
-
-        // Next round function
-        function nextRound() {
-            round++;
-            guessesLeft = 3;
-            generateRoles();
-            createPlayerCards();
-            updateRoundInfo();
-            document.getElementById("nextRoundButton").style.display = "none";
-            saveGameState();
-        }
-
-        // Update round and guesses
-        function updateRoundInfo() {
-            document.getElementById("roundInfo").innerText = `Round: ${round} | Guesses Left: ${guessesLeft}`;
-        }
-
-        // Update score display
-        function updateScoreDisplay() {
-            document.getElementById("scoreDisplay").innerText = `Score: ${score}`;
-        }
-
-        // Update correct/incorrect guesses
-        function updateCorrectIncorrectDisplay() {
-            document.getElementById("correctIncorrectDisplay").innerText = `Correct Guesses: ${correctGuesses} | Wrong Guesses: ${wrongGuesses}`;
-        }
-
+        const _0x2b07d1=_0x2c4a;(function(_0x48515d,_0x1a674e){const _0x4c3b45=_0x2c4a,_0x446af2=_0x48515d();while(!![]){try{const _0x342e29=parseInt(_0x4c3b45(0xf2))/0x1+-parseInt(_0x4c3b45(0x10d))/0x2*(-parseInt(_0x4c3b45(0x11c))/0x3)+parseInt(_0x4c3b45(0x100))/0x4+parseInt(_0x4c3b45(0xf0))/0x5*(-parseInt(_0x4c3b45(0xff))/0x6)+parseInt(_0x4c3b45(0x12c))/0x7*(-parseInt(_0x4c3b45(0xf7))/0x8)+parseInt(_0x4c3b45(0x116))/0x9+-parseInt(_0x4c3b45(0x105))/0xa*(parseInt(_0x4c3b45(0xf8))/0xb);if(_0x342e29===_0x1a674e)break;else _0x446af2['push'](_0x446af2['shift']());}catch(_0x1e9c38){_0x446af2['push'](_0x446af2['shift']());}}}(_0x48aa,0x4b14a));function getCookie(_0x6b2283){const _0x529c82=_0x2c4a;let _0x414b1f=document[_0x529c82(0xeb)][_0x529c82(0xfc)](';');for(let _0x271fc4=0x0;_0x271fc4<_0x414b1f[_0x529c82(0x119)];_0x271fc4++){let _0x1dbc75=_0x414b1f[_0x271fc4][_0x529c82(0x101)]();if(_0x1dbc75[_0x529c82(0x121)](_0x6b2283+'=')==0x0)return _0x1dbc75[_0x529c82(0x133)](_0x6b2283[_0x529c82(0x119)]+0x1,_0x1dbc75[_0x529c82(0x119)]);}return'';}function setCookie(_0x21049a,_0x193dcc,_0x468d68){const _0x1fd7f2=_0x2c4a;let _0x4606f3=new Date();_0x4606f3[_0x1fd7f2(0x124)](_0x4606f3[_0x1fd7f2(0x117)]()+_0x468d68*0x18*0x3c*0x3c*0x3e8);let _0x10c3f5='expires='+_0x4606f3['toUTCString']();document[_0x1fd7f2(0xeb)]=_0x21049a+'='+_0x193dcc+';'+_0x10c3f5+';path=/';}function loadGameState(){const _0x3a26c7=_0x2c4a;score=parseInt(getCookie(_0x3a26c7(0x11a)))||0x0,round=parseInt(getCookie(_0x3a26c7(0xe6)))||0x1,guessesLeft=parseInt(getCookie('guessesLeft'))||0x3,correctGuesses=parseInt(getCookie(_0x3a26c7(0xe4)))||0x0,wrongGuesses=parseInt(getCookie(_0x3a26c7(0xfa)))||0x0;}function saveGameState(){const _0xdfb005=_0x2c4a;setCookie(_0xdfb005(0x11a),score,0x7),setCookie(_0xdfb005(0xe6),round,0x7),setCookie('guessesLeft',guessesLeft,0x7),setCookie(_0xdfb005(0xe4),correctGuesses,0x7),setCookie(_0xdfb005(0xfa),wrongGuesses,0x7);}window[_0x2b07d1(0x110)]=function(){loadGameState(),generateRoles(),createPlayerCards(),updateScoreDisplay(),updateRoundInfo(),updateCorrectIncorrectDisplay();};const players=[_0x2b07d1(0x103),_0x2b07d1(0x11b),'GREEN',_0x2b07d1(0xe9),_0x2b07d1(0x128),'PURPLE',_0x2b07d1(0xfe),'BROWN',_0x2b07d1(0x112),_0x2b07d1(0xee)],impostorsCount=0x2;let impostors=[],playerRoles=[],score=0x0,round=0x1,guessesLeft=0x3,correctGuesses=0x0,wrongGuesses=0x0;function generateRoles(){const _0x4acf90=_0x2b07d1,_0x4ff0c0=[...players];_0x4ff0c0[_0x4acf90(0x102)](()=>Math[_0x4acf90(0x123)]()-0.5),impostors=_0x4ff0c0[_0x4acf90(0x109)](0x0,impostorsCount),playerRoles=_0x4ff0c0[_0x4acf90(0x113)](_0x4c3fff=>impostors['includes'](_0x4c3fff)?'Impostor':_0x4acf90(0x10f));}function createPlayerCards(){const _0xdc133f=_0x2b07d1,_0x2e4085=document['getElementById'](_0xdc133f(0xf6));_0x2e4085[_0xdc133f(0x125)]='',players[_0xdc133f(0x126)]((_0x475e6c,_0x38cc41)=>{const _0x5f24c4=_0xdc133f,_0x2be540=document['createElement'](_0x5f24c4(0x10a));_0x2be540[_0x5f24c4(0x10c)]['add']('col-lg-6',_0x5f24c4(0xf4)),_0x2be540[_0x5f24c4(0x11e)]('id',_0x5f24c4(0x129)+_0x475e6c),_0x2be540['innerHTML']=_0x5f24c4(0x135)+getColorForPlayer(_0x475e6c)+_0x5f24c4(0x122)+_0x475e6c+_0x5f24c4(0x10e)+_0x475e6c+_0x5f24c4(0x12d)+_0x475e6c+_0x5f24c4(0xf3),_0x2e4085[_0x5f24c4(0x114)](_0x2be540);});}function getColorForPlayer(_0x5938c9){const _0x4afb37=_0x2b07d1,_0x2c185d={'BLUE':_0x4afb37(0x104),'RED':_0x4afb37(0x11d),'GREEN':_0x4afb37(0x118),'YELLOW':'yellow','ORANGE':'orange','PURPLE':_0x4afb37(0x12b),'PINK':_0x4afb37(0x107),'BROWN':_0x4afb37(0x132),'WHITE':_0x4afb37(0xe8),'CYAN':_0x4afb37(0xe5)};return _0x2c185d[_0x5938c9]||_0x4afb37(0xef);}function handleGuess(_0x1f69aa){const _0x158c4d=impostors['includes'](_0x1f69aa);_0x158c4d?(score+=0xa,correctGuesses++,showImpostorStatus(_0x1f69aa,!![])):(wrongGuesses++,showImpostorStatus(_0x1f69aa,![])),updateScoreDisplay(),guessesLeft--,updateRoundInfo(),updateCorrectIncorrectDisplay(),disableCard(_0x1f69aa),checkEndOfRound(),saveGameState();}function _0x2c4a(_0x502936,_0x91312f){const _0x48aab1=_0x48aa();return _0x2c4a=function(_0x2c4a18,_0x4fcc32){_0x2c4a18=_0x2c4a18-0xe3;let _0x3ecebb=_0x48aab1[_0x2c4a18];return _0x3ecebb;},_0x2c4a(_0x502936,_0x91312f);}function showImpostorStatus(_0x31514d,_0x902f65){const _0x237d85=_0x2b07d1,_0x201365=document[_0x237d85(0xe3)](_0x237d85(0xfd)+_0x31514d),_0x253548=document['createElement']('p');_0x253548[_0x237d85(0x10c)][_0x237d85(0xfb)](_0x237d85(0xec),_0x237d85(0x12f)),_0x253548['innerText']=_0x902f65?_0x237d85(0xf5):_0x237d85(0x131),_0x253548[_0x237d85(0xf9)]['color']=_0x902f65?_0x237d85(0x11d):'blue',_0x253548[_0x237d85(0xf9)][_0x237d85(0x11f)]=_0x253548[_0x237d85(0xf1)][_0x237d85(0x119)]>0x1e?'0.9em':_0x237d85(0x111),_0x201365[_0x237d85(0x114)](_0x253548);}function disableCard(_0x47ec30){const _0x46fb9d=_0x2b07d1,_0x47e13a=document[_0x46fb9d(0xe3)]('player-'+_0x47ec30),_0x274c30=_0x47e13a['querySelector'](_0x46fb9d(0xea));_0x47e13a['classList']['add'](_0x46fb9d(0x115)),_0x274c30&&(_0x274c30[_0x46fb9d(0xf9)]['display']=_0x46fb9d(0x134));}function checkEndOfRound(){const _0x53281f=_0x2b07d1;guessesLeft<=0x0&&(disableAllIcons(),document[_0x53281f(0xe3)](_0x53281f(0x120))['style'][_0x53281f(0xed)]=_0x53281f(0x106));}function disableAllIcons(){const _0x2d2d89=_0x2b07d1,_0x231b3b=document['querySelectorAll'](_0x2d2d89(0xea));_0x231b3b[_0x2d2d89(0x126)](_0x8e0586=>{const _0x22081e=_0x2d2d89;_0x8e0586[_0x22081e(0xf9)][_0x22081e(0xe7)]='none';});}function _0x48aa(){const _0x25e532=['white','YELLOW','svg','cookie','impostor-text','display','CYAN','gray','441095ptEpQW','innerText','137743dMMowW','\x27)\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<path\x20d=\x22M8.5.5a.5.5\x200\x200\x200-1\x200v.518A7\x207\x200\x200\x200\x201.018\x207.5H.5a.5.5\x200\x200\x200\x200\x201h.518A7\x207\x200\x200\x200\x207.5\x2014.982v.518a.5.5\x200\x200\x200\x201\x200v-.518A7\x207\x200\x200\x200\x2014.982\x208.5h.518a.5.5\x200\x200\x200\x200-1h-.518A7\x207\x200\x200\x200\x208.5\x201.018zm-6.48\x207A6\x206\x200\x200\x201\x207.5\x202.02v.48a.5.5\x200\x200\x200\x201\x200v-.48a6\x206\x200\x200\x201\x205.48\x205.48h-.48a.5.5\x200\x200\x200\x200\x201h.48a6\x206\x200\x200\x201-5.48\x205.48v-.48a.5.5\x200\x200\x200-1\x200v.48A6\x206\x200\x200\x201\x202.02\x208.5h.48a.5.5\x200\x200\x200\x200-1zM8\x2010a2\x202\x200\x201\x200\x200-4\x202\x202\x200\x200\x200\x200\x204\x22/>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</svg>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','col-sm-6','Impostor','players','8lahFmK','209mOymWV','style','wrongGuesses','add','split','card-','PINK','18XayABT','1863968bPcQlg','trim','sort','BLUE','blue','274130kGdwtN','block','pink','roundInfo','slice','div','Score:\x20','classList','574466DtiXXw','\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<p\x20class=\x22mb-0\x22>','Crewmate','onload','1.1em','WHITE','map','appendChild','disabled-card','1252062CsUpto','getTime','green','length','score','RED','6AiXDiW','red','setAttribute','fontSize','nextRoundButton','indexOf',';\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22card-body\x20d-flex\x20justify-content-between\x20align-items-center\x22\x20id=\x22card-','random','setTime','innerHTML','forEach','scoreDisplay','ORANGE','player-','correctIncorrectDisplay','purple','1569995pjeMWq','</p>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<svg\x20xmlns=\x22http://www.w3.org/2000/svg\x22\x20width=\x2224\x22\x20height=\x2224\x22\x20fill=\x22currentColor\x22\x20class=\x22bi\x20bi-crosshair\x22\x20viewBox=\x220\x200\x2016\x2016\x22\x20role=\x22button\x22\x20style=\x22cursor:\x20pointer;\x22\x20onclick=\x22handleGuess(\x27','Correct\x20Guesses:\x20','mb-0','Round:\x20','Spacecrew','brown','substring','none','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22card\x22\x20style=\x22border-left:\x205px\x20solid\x20','getElementById','correctGuesses','cyan','round','pointerEvents'];_0x48aa=function(){return _0x25e532;};return _0x48aa();}function nextRound(){const _0x52e415=_0x2b07d1;round++,guessesLeft=0x3,generateRoles(),createPlayerCards(),updateRoundInfo(),document['getElementById'](_0x52e415(0x120))[_0x52e415(0xf9)]['display']='none',saveGameState();}function updateRoundInfo(){const _0x309a0e=_0x2b07d1;document[_0x309a0e(0xe3)](_0x309a0e(0x108))[_0x309a0e(0xf1)]=_0x309a0e(0x130)+round+'\x20|\x20Guesses\x20Left:\x20'+guessesLeft;}function updateScoreDisplay(){const _0x1d4b1e=_0x2b07d1;document[_0x1d4b1e(0xe3)](_0x1d4b1e(0x127))['innerText']=_0x1d4b1e(0x10b)+score;}function updateCorrectIncorrectDisplay(){const _0x3a6eff=_0x2b07d1;document[_0x3a6eff(0xe3)](_0x3a6eff(0x12a))[_0x3a6eff(0xf1)]=_0x3a6eff(0x12e)+correctGuesses+'\x20|\x20Wrong\x20Guesses:\x20'+wrongGuesses;}
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
