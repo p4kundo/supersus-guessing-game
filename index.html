@@ -28,13 +28,6 @@
             margin-bottom: 20px;
         }
 
-        .result-message {
-            font-size: 1.25em;
-            font-weight: bold;
-            margin-top: 20px;
-            color: green;
-        }
-
         .round-info {
             font-size: 1.25em;
             margin-top: 10px;
@@ -99,17 +92,22 @@
                             </div>
                         </div>
                         <div class="col-lg-12 col-sm-12">
-                          
+                          <div class="card">
+                            <div class="card-body">
+                              <div id="correctIncorrectDisplay" class="result-message">
+                                Correct Guesses: 0 | Wrong Guesses: 0
+                              </div>
+                            </div>
+                          </div>
                         </div>
+                      
+
                     </div>
                 </div>
                 </div>
-                <!-- Result Message -->
-                <div id="resultMessage" class="result-message" style="display: none;"></div>
-                <div id="correctIncorrectDisplay" class="result-message" style="display: none;">
-                    Correct Guesses: 0 | Wrong Guesses: 0
-                </div>
+                
             </div>
+            
         </div>
 
         <!-- Next Round Button -->
@@ -117,7 +115,7 @@
     </div>
 
     <script>
-        const players = ["BLUE", "RED", "GREEN", "YELLOW", "ORANGE", "PURPLE", "PINK", "BROWN"];
+        const players = ["BLUE", "RED", "GREEN", "YELLOW", "ORANGE", "PURPLE", "PINK", "BROWN", "WHITE", "CYAN"];
         const impostorsCount = 2;
         let impostors = [];
         let playerRoles = [];
@@ -169,7 +167,9 @@
                 "ORANGE": "orange",
                 "PURPLE": "purple",
                 "PINK": "pink",
-                "BROWN": "brown"
+                "BROWN": "brown",
+                "WHITE": "white",
+                "CYAN": "cyan"
             };
             return colorMapping[player] || 'gray';
         }
@@ -181,11 +181,9 @@
             if (isImpostor) {
                 score += 10; // Add points for a correct guess
                 correctGuesses++; // Increment correct guesses
-                displayResult("Correct! This player is an Impostor.");
                 showImpostorStatus(player, true); // Show impostor text
             } else {
                 wrongGuesses++; // Increment wrong guesses
-                displayResult("Wrong! This player is not an Impostor.");
                 showImpostorStatus(player, false); // Show impostor text
             }
             updateScoreDisplay();
@@ -236,9 +234,19 @@
         // Function to check if the round is over
         function checkEndOfRound() {
             if (guessesLeft <= 0) {
-                // Show "Next Round" button when guesses are finished
+                // Disable all guess icons when guesses are finished
+                disableAllIcons();
+                // Show "Next Round" button
                 document.getElementById("nextRoundButton").style.display = "block";
             }
+        }
+
+        // Function to disable all icons when guesses are finished
+        function disableAllIcons() {
+            const icons = document.querySelectorAll('svg');
+            icons.forEach(icon => {
+                icon.style.pointerEvents = "none"; // Disable click on all icons
+            });
         }
 
         // Function to go to the next round
@@ -249,16 +257,6 @@
             createPlayerCards(); // Refresh player cards
             updateRoundInfo();
             document.getElementById("nextRoundButton").style.display = "none"; // Hide next round button
-        }
-
-        // Display result message
-        function displayResult(message) {
-            const resultMessage = document.getElementById("resultMessage");
-            resultMessage.style.display = "block";
-            resultMessage.textContent = message;
-            setTimeout(function() {
-                resultMessage.style.display = "none"; // Hide the message after 3 seconds
-            }, 3000);
         }
 
         // Update the round and guesses display
