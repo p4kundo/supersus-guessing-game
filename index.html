@@ -6,23 +6,6 @@
     <title>Among Us Guessing Game</title>
     <link rel="stylesheet" href="bootstrap.min.css">
     <style>
-        html, body {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            width: 100%;
-            overflow: hidden;
-        }
-
-        .container {
-            height: 100%;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-        }
-
         .score {
             font-size: 1.5em;
             margin-bottom: 20px;
@@ -51,8 +34,8 @@
     </style>
 </head>
 <body>
-    <div class="container-lg mt-5">
-        <h1 class="text-center mb-4">SUPERSUS - WHITEJACK GAME</h1>
+    <div class="container-lg mt-4">
+        <h1 class="text-center mb-3">SUPERSUS - GUESSING GAME</h1>
 
         <!-- Score Display -->
         <div class="d-flex justify-content-between">
@@ -100,8 +83,6 @@
                             </div>
                           </div>
                         </div>
-                      
-
                     </div>
                 </div>
                 </div>
@@ -115,6 +96,55 @@
     </div>
 
     <script>
+        // Function to read a cookie by name
+        function getCookie(name) {
+            let cookieArr = document.cookie.split(';');
+            for (let i = 0; i < cookieArr.length; i++) {
+                let cookie = cookieArr[i].trim();
+                if (cookie.indexOf(name + "=") == 0) {
+                    return cookie.substring(name.length + 1, cookie.length);
+                }
+            }
+            return "";
+        }
+
+        // Function to set a cookie
+        function setCookie(name, value, days) {
+            let date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            let expires = "expires=" + date.toUTCString();
+            document.cookie = name + "=" + value + ";" + expires + ";path=/";
+        }
+
+        // Function to load game state from cookies
+        function loadGameState() {
+            score = parseInt(getCookie('score')) || 0;
+            round = parseInt(getCookie('round')) || 1;
+            guessesLeft = parseInt(getCookie('guessesLeft')) || 3;
+            correctGuesses = parseInt(getCookie('correctGuesses')) || 0;
+            wrongGuesses = parseInt(getCookie('wrongGuesses')) || 0;
+        }
+
+        // Function to save game state to cookies
+        function saveGameState() {
+            setCookie('score', score, 7);
+            setCookie('round', round, 7);
+            setCookie('guessesLeft', guessesLeft, 7);
+            setCookie('correctGuesses', correctGuesses, 7);
+            setCookie('wrongGuesses', wrongGuesses, 7);
+        }
+
+        // Loading the game state when the page is loaded
+        window.onload = function() {
+            loadGameState();  // Load saved data from cookies
+            generateRoles();  // Generate roles for the current round
+            createPlayerCards();  // Create the player cards for the current round
+            updateScoreDisplay();  // Update the score display
+            updateRoundInfo();  // Update the round and guesses left display
+            updateCorrectIncorrectDisplay(); // Display correct/incorrect guesses
+        }
+
+        // Players and impostors
         const players = ["BLUE", "RED", "GREEN", "YELLOW", "ORANGE", "PURPLE", "PINK", "BROWN", "WHITE", "CYAN"];
         const impostorsCount = 2;
         let impostors = [];
@@ -192,94 +222,74 @@
             updateCorrectIncorrectDisplay();
             disableCard(player); // Disable the card after guessing
             checkEndOfRound();
+            saveGameState(); // Save game state to cookies
         }
 
         // Show Impostor Text on the Card
         function showImpostorStatus(player, isImpostor) {
             const cardBody = document.getElementById(`card-${player}`);
             const impostorText = document.createElement('p');
-            
-            // Add the 'impostor-text' and 'mb-0' classes
             impostorText.classList.add('impostor-text', 'mb-0');
-            
-            // Set the text based on whether it's an Impostor or Spacecrew
             impostorText.innerText = isImpostor ? "Impostor" : "Spacecrew";
-            
-            // Set the text color based on the role
-            if (isImpostor) {
-                impostorText.style.color = 'red';  // Impostor is red
-            } else {
-                impostorText.style.color = 'blue'; // Spacecrew is blue
-            }
-            
-            // Adjust the font size based on text length
-            const textLength = impostorText.innerText.length;
-            impostorText.style.fontSize = (textLength > 30) ? "0.9em" : "1.1em";
-
-            // Append the text to the card
+            impostorText.style.color = isImpostor ? 'red' : 'blue';
+            impostorText.style.fontSize = impostorText.innerText.length > 30 ? "0.9em" : "1.1em";
             cardBody.appendChild(impostorText);
         }
 
         // Disable the player card and hide the icon
         function disableCard(player) {
             const playerCard = document.getElementById(`player-${player}`);
-            const icon = playerCard.querySelector('svg'); // Get the icon (SVG element)
-            
-            playerCard.classList.add("disabled-card"); // Disable the card
+            const icon = playerCard.querySelector('svg'); 
+            playerCard.classList.add("disabled-card"); 
             if (icon) {
-                icon.style.display = "none"; // Hide the icon
+                icon.style.display = "none"; 
             }
         }
 
-        // Function to check if the round is over
+        // Check if the round is over
         function checkEndOfRound() {
             if (guessesLeft <= 0) {
-                // Disable all guess icons when guesses are finished
                 disableAllIcons();
-                // Show "Next Round" button
                 document.getElementById("nextRoundButton").style.display = "block";
             }
         }
 
-        // Function to disable all icons when guesses are finished
+        // Disable all icons when guesses are finished
         function disableAllIcons() {
             const icons = document.querySelectorAll('svg');
             icons.forEach(icon => {
-                icon.style.pointerEvents = "none"; // Disable click on all icons
+                icon.style.pointerEvents = "none";
             });
         }
 
-        // Function to go to the next round
+        // Next round function
         function nextRound() {
             round++;
-            guessesLeft = 3; // Reset guesses for next round
-            generateRoles(); // Shuffle impostors and roles
-            createPlayerCards(); // Refresh player cards
+            guessesLeft = 3;
+            generateRoles();
+            createPlayerCards();
             updateRoundInfo();
-            document.getElementById("nextRoundButton").style.display = "none"; // Hide next round button
+            document.getElementById("nextRoundButton").style.display = "none";
+            saveGameState();
         }
 
-        // Update the round and guesses display
+        // Update round and guesses
         function updateRoundInfo() {
             document.getElementById("roundInfo").innerText = `Round: ${round} | Guesses Left: ${guessesLeft}`;
         }
 
-        // Update the score display
+        // Update score display
         function updateScoreDisplay() {
             document.getElementById("scoreDisplay").innerText = `Score: ${score}`;
         }
 
-        // Update the correct and wrong guesses display
+        // Update correct/incorrect guesses
         function updateCorrectIncorrectDisplay() {
-            document.getElementById("correctIncorrectDisplay").style.display = "block";
             document.getElementById("correctIncorrectDisplay").innerText = `Correct Guesses: ${correctGuesses} | Wrong Guesses: ${wrongGuesses}`;
         }
 
-        // Initial setup
-        generateRoles();
-        createPlayerCards();
     </script>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 </body>
 </html>
