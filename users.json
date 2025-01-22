@@ -1,0 +1,20 @@
+[
+    {
+        "SpaceID": 123,
+        "password": "123",
+        "score": 0,
+        "new": true
+    },
+    {
+        "name": "sweet pakundo",
+        "SpaceID": 111,
+        "password": "$2y$10$kICGLYKpy6TWh4hx3i7L3eLyFuDP1R98sSebPEn83o\/VBXjePEin.",
+        "score": 140
+    },
+    {
+        "name": "gg",
+        "SpaceID": 222,
+        "password": "$2y$10$b4\/uKcCsHUA6pstvMaFvku1yI38Fd8MZBH9PRW81IS7s0tZLR8L.u",
+        "score": 20
+    }
+]
