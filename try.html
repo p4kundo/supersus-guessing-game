@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitHub JSON API Example</title>
+  <style>
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    table, th, td {
+      border: 1px solid black;
+    }
+    th, td {
+      padding: 8px 12px;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+  </style>
+</head>
+<body>
+
+<h1>GitHub JSON Update Example</h1>
+
+<!-- Button to trigger the update and fetch -->
+<button onclick="updateGitHubFile()">Update JSON on GitHub</button>
+
+<!-- Area to display fetched data -->
+<h3>Fetched Data from GitHub:</h3>
+<div id="jsonData">
+  <table id="dataTable">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>SpaceID</th>
+        <th>Password</th>
+        <th>Score</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Fetched data rows will be inserted here -->
+    </tbody>
+  </table>
+</div>
+
+<script>
+// Your GitHub repository and token
+const repoOwner = 'p4kundo'; // Replace with your GitHub username
+const repoName = 'supersus-guessing-game'; // Replace with your repository name
+const filePath = 'users.json'; // The path of the file you want to update
+const token = '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'; // Your GitHub personal access token (BE CAREFUL with this!)
+
+// Function to fetch and display data from GitHub
+async function fetchGitHubData() {
+  const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`;
+
+  try {
+    // Fetch the content of the file
+    const response = await fetch(apiUrl, {
+      method: 'GET',
+      headers: {
+        'Authorization': `token ${token}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+
+    if (!response.ok) {
+      alert('Error fetching file data from GitHub');
+      return;
+    }
+
+    const data = await response.json();
+
+    // Decode the base64 content of the file
+    const decodedContent = atob(data.content);
+
+    // Parse the JSON data
+    const players = JSON.parse(decodedContent);
+
+    // Display the fetched data in a table
+    const tableBody = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
+    tableBody.innerHTML = ''; // Clear previous data
+
+    players.forEach(player => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${player.name || 'N/A'}</td>
+        <td>${player.SpaceID || 'N/A'}</td>
+        <td>${player.password || 'N/A'}</td>
+        <td>${player.score || 'N/A'}</td>
+      `;
+      tableBody.appendChild(row);
+    });
+
+  } catch (error) {
+    alert('Error: ' + error.message);
+  }
+}
+
+// Function to update the file
+async function updateGitHubFile() {
+  const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`;
+
+  try {
+    // Fetch the existing content of the file from GitHub
+    const response = await fetch(apiUrl, {
+      method: 'GET',
+      headers: {
+        'Authorization': `token ${token}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+
+    if (!response.ok) {
+      alert('Error fetching file data from GitHub');
+      return;
+    }
+
+    const data = await response.json();
+
+    // Parse the existing content and update it
+    const currentData = JSON.parse(atob(data.content)); // Decode base64 content
+    console.log('Current Data:', currentData);
+
+    // New data to be added
+    const newPlayer = {
+      name: 'New Player',
+      SpaceID: 333,
+      password: 'newpassword',
+      score: 0
+    };
+
+    // Add new player to the existing data
+    currentData.push(newPlayer);
+
+    // Prepare the new content to be updated
+    const updatedContent = JSON.stringify(currentData, null, 2);
+    const encodedContent = btoa(updatedContent); // Encode content back to base64
+
+    // Send the updated content to GitHub using a PUT request
+    const commitMessage = 'Add new player data';
+
+    const updateResponse = await fetch(apiUrl, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `token ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        message: commitMessage,
+        content: encodedContent, // Base64 encoded content
+        sha: data.sha, // Required to specify the file's current version
+      })
+    });
+
+    if (updateResponse.ok) {
+      alert('Player added successfully!');
+      fetchGitHubData(); // Refresh data view after adding new player
+    } else {
+      const errorData = await updateResponse.json();
+      alert('Error updating the file on GitHub: ' + errorData.message);
+    }
+  } catch (error) {
+    alert('Error: ' + error.message);
+  }
+}
+
+// Fetch and display the data when the page loads
+fetchGitHubData();
+</script>
+
+</body>
+</html>
