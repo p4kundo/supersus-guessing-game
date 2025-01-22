@@ -82,5 +82,11 @@
     "SpaceID": 333,
     "password": "newpassword",
     "score": 0
+  },
+  {
+    "name": "New Player",
+    "SpaceID": 333,
+    "password": "newpassword",
+    "score": 0
   }
 ]
