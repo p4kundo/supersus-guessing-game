@@ -56,8 +56,8 @@ const token = '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'; // Your GitHub persona
 
 // Function to fetch and display data from GitHub
 async function fetchGitHubData() {
-  const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`;
-
+  // const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`;
+  const apiUrl =  `https://raw.githubusercontent.com/p4kundo/supersus-guessing-game/refs/heads/main/users.json`
   try {
     // Fetch the content of the file
     const response = await fetch(apiUrl, {
