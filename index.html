@@ -98,38 +98,6 @@
         let wrongGuesses = 0;
         let consecutiveCorrectGuesses = 0;
 
-        function getGameDataFromCookie() {
-            const match = document.cookie.match(new RegExp('(^| )gameData=([^;]+)'));
-            return match ? JSON.parse(decodeURIComponent(match[2])) : {};
-        }
-
-        function updateGameData() {
-            const gameData = {
-                score: score,
-                round: round,
-                guessesLeft: guessesLeft,
-                correctGuesses: correctGuesses,
-                wrongGuesses: wrongGuesses
-            };
-            document.cookie = `gameData=${JSON.stringify(gameData)}; path=/;`;
-        }
-
-        function initializeGame() {
-            const savedData = getGameDataFromCookie();
-            score = savedData.score || 0;
-            round = savedData.round || 1;
-            guessesLeft = savedData.guessesLeft || 3; 
-            correctGuesses = savedData.correctGuesses || 0;
-            wrongGuesses = savedData.wrongGuesses || 0;
-
-            generateRoles();
-            createPlayerCards();
-            updateScoreDisplay();
-            updateRoundInfo();
-            updateCorrectIncorrectDisplay();
-            updateAccuracyDisplay();
-        }
-
         function generateRoles() {
             const allPlayers = [...players];
             allPlayers.sort(() => Math.random() - 0.5);
@@ -144,7 +112,7 @@
                 const playerCard = document.createElement("div");
                 playerCard.classList.add("col-lg-6", "col-sm-6");
                 playerCard.setAttribute("id", `player-${player}`);
-                playerCard.innerHTML = ` 
+                playerCard.innerHTML = `
                     <div class="card" style="border-left: 5px solid ${getColorForPlayer(player)};">
                         <div class="card-body d-flex justify-content-between align-items-center" id="card-${player}">
                             <p class="mb-0">${player}</p>
@@ -189,7 +157,8 @@
             }
 
             guessesLeft--;
-            updateGameData();
+            updateScoreDisplay();
+            updateGameData(); 
             updateRoundInfo();
             updateCorrectIncorrectDisplay();
             updateAccuracyDisplay();
@@ -261,8 +230,41 @@
             document.getElementById("accuracyDisplay").innerText = `Accuracy: ${accuracy}%`;
         }
 
+        function updateGameData() {
+            const gameData = {
+                score: score,
+                round: round,
+                guessesLeft: guessesLeft,
+                correctGuesses: correctGuesses,
+                wrongGuesses: wrongGuesses
+            };
+            document.cookie = `gameData=${JSON.stringify(gameData)}; path=/;`;
+        }
+
         window.onload = function() {
-            initializeGame();
+            const gameData = getGameDataFromCookies();
+            if (gameData) {
+                score = gameData.score;
+                round = gameData.round;
+                guessesLeft = gameData.guessesLeft;
+                correctGuesses = gameData.correctGuesses;
+                wrongGuesses = gameData.wrongGuesses;
+            }
+
+            generateRoles();
+            createPlayerCards();
+            updateScoreDisplay();
+            updateRoundInfo();
+            updateCorrectIncorrectDisplay();
+            updateAccuracyDisplay();
+        }
+
+        function getGameDataFromCookies() {
+            const match = document.cookie.match(/gameData=([^;]+)/);
+            if (match) {
+                return JSON.parse(match[1]);
+            }
+            return null;
         }
     </script>
 
