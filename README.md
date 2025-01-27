@@ -1,6 +1,6 @@
 # Supersus Guessing Game
 
-Welcome to the **Supersus Guessing Game**! Players must guess the impostors among the space crew .
+Welcome to the **Supersus Guessing Game**! Players must guess the impostors among the space crew.
 
 ## Demo
 
